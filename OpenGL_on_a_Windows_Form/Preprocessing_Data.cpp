@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Preprocessing_Data.h"
 
 #include <algorithm>
@@ -50,8 +50,10 @@ void Preprocessing_Data::start2(vector<month> month_vec_read, int k)
 {
 	month_vec = month_vec_read;
 
+	int dim = month_vec[0].day_vec[0].data_dim;
+	float *max_data = new float[dim];
+	for(int i=0;i<dim;i++) max_data[i] = -1000;
 
-	float max_data = -1000;
 	day_amount = 0;
 	for(int i=0;i<month_vec.size();i++)
 	{
@@ -59,10 +61,13 @@ void Preprocessing_Data::start2(vector<month> month_vec_read, int k)
 		for(int j=0;j<month_vec[i].day_vec.size();j++)
 		{
 			day_amount++;
-			float data = month_vec[i].day_vec[j].data[0];
-			if(data > max_data)
+			for(int u=0;u<dim;u++)
 			{
-				max_data = data;
+				float data = month_vec[i].day_vec[j].data[u];
+				if(data > max_data[u])
+				{
+					max_data[u] = data;
+				}
 			}
 			//cout << month_vec[i].day_vec[j].month << " " << month_vec[i].day_vec[j].date << " ";
 			//cout << month_vec[i].day_vec[j].data[0] << " " << month_vec[i].day_vec[j].data[1] << endl;
@@ -70,13 +75,18 @@ void Preprocessing_Data::start2(vector<month> month_vec_read, int k)
 		//cout << endl;
 	}
 
-	//cout << "max data " << max_data << endl;
-	int digit = count_digit(max_data);
-	//cout << "digit " << digit << endl;
+
+	int* digit = new int[dim];
+	for(int i=0;i<dim;i++)
+	{
+		cout << "max data " << max_data[i] << endl;
+		digit[i] = count_digit(max_data[i]);
+		cout << "digit " << digit[i] << endl;
+	}
 
 
 	//int dim = month_vec[0].day_vec[0].data_dim;
-	int dim = 1;
+	//int dim = 1;
 	Mat model = Mat::zeros(day_amount,dim,CV_32F);
 	int t = 0;
 	for(int i=0;i<month_vec.size();i++)
@@ -86,12 +96,18 @@ void Preprocessing_Data::start2(vector<month> month_vec_read, int k)
 			for(int u=0;u<dim;u++)
 			{
 				if(month_vec[i].day_vec[j].data[u] < 0) month_vec[i].day_vec[j].data[u] = 0.0;
-				model.at<float>(t,u) = month_vec[i].day_vec[j].data[u]/pow(10.0,digit-2);
-				//model.at<float>(t,u) = month_vec[i].day_vec[j].data[u]/10.0;	
+				model.at<float>(t,u) = month_vec[i].day_vec[j].data[u];
+				//model.at<float>(t,u) = month_vec[i].day_vec[j].data[u]/pow(10.0,digit[u]-2);
 			}
 			t++;
 		}
 	}
+
+	for(int i=0;i<model.cols;i++)
+	{
+		normalize(model.col(i),model.col(i),0,10,NORM_MINMAX);
+	}
+	model.col(0) = model.col(0).mul(2);
 
 	output_mat_as_csv_file_float("model.csv",model);
 	//============Setting matrix for K-means============//
@@ -109,13 +125,13 @@ void Preprocessing_Data::start2(vector<month> month_vec_read, int k)
 	
     //int k = 4; 
     Mat cluster_tag; //Tag:0~k-1
-    int attempts = 2;//À³¸Ó¬O°õ¦æ¦¸¼Æ
+    int attempts = 2;//æ‡‰è©²æ˜¯åŸ·è¡Œæ¬¡æ•¸
 	Mat cluster_centers;
-	//¨Ï¥Îk means¤À¸s
+	//ä½¿ç”¨k meansåˆ†ç¾¤
 	clock_t begin3 = clock();
 	kmeans(model, k, cluster_tag,TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 100, 0.0001), attempts,KMEANS_PP_CENTERS,cluster_centers);
 	clock_t end3 = clock();
-    //TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 10, 1),  ³o¸Ì¦³¤T­Ó°Ñ¼Æ¡A¨M©wk-means¦ó®Éµ²§ô¡A²Ä¤G­Ó°Ñ¼Æ¬O«ü­¡¥N³Ì¤j¦¸¼Æ¡A²Ä¤T­Ó°Ñ¼Æ¬Oºë½T«×¦h¤Ö¡A²Ä¤@­Ó°Ñ¼Æ¬O«ü¨Ì·Ó«e¨â­Ó°Ñ¼Æªº­ş¤@­Ó¬°·Ç¡A¥H½d¨Ò¤¤´N¬O¨âªÌ³£°Ñ·Ó¡A¥H or ªº¤è¦¡¨M©w
+    //TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 10, 1),  é€™è£¡æœ‰ä¸‰å€‹åƒæ•¸ï¼Œæ±ºå®šk-meansä½•æ™‚çµæŸï¼Œç¬¬äºŒå€‹åƒæ•¸æ˜¯æŒ‡è¿­ä»£æœ€å¤§æ¬¡æ•¸ï¼Œç¬¬ä¸‰å€‹åƒæ•¸æ˜¯ç²¾ç¢ºåº¦å¤šå°‘ï¼Œç¬¬ä¸€å€‹åƒæ•¸æ˜¯æŒ‡ä¾ç…§å‰å…©å€‹åƒæ•¸çš„å“ªä¸€å€‹ç‚ºæº–ï¼Œä»¥ç¯„ä¾‹ä¸­å°±æ˜¯å…©è€…éƒ½åƒç…§ï¼Œä»¥ or çš„æ–¹å¼æ±ºå®š
 	//printf("Kmeans (K = %d) elapsed time: %f\n",k,double(end3 - begin3) / CLOCKS_PER_SEC);
 	
 	//================K means clustering with cuda=====================//
@@ -274,13 +290,13 @@ void Preprocessing_Data::start(vector < vector<float> > raw_data,vector<int> att
 	//==============K means clustering==================//
     //Mat cluster_tag; //Tag:0~k-1
 	//Mat cluster_centers;
-	int attempts = 2;//À³¸Ó¬O°õ¦æ¦¸¼Æ
-	//¨Ï¥Îk means¤À¸s
+	int attempts = 2;//æ‡‰è©²æ˜¯åŸ·è¡Œæ¬¡æ•¸
+	//ä½¿ç”¨k meansåˆ†ç¾¤
 	Mat cluster_tag = Mat::zeros(model.rows,1,CV_32S);
 	Mat cluster_centers = Mat::zeros(k,model.cols,CV_32F);
 	cuda_kmeans(model, k, cluster_tag, cluster_centers);
 	//kmeans(model, k, cluster_tag,TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 100, 0.0001), attempts,KMEANS_PP_CENTERS,cluster_centers);
-    //TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 10, 1),  ³o¸Ì¦³¤T­Ó°Ñ¼Æ¡A¨M©wk-means¦ó®Éµ²§ô¡A²Ä¤G­Ó°Ñ¼Æ¬O«ü­¡¥N³Ì¤j¦¸¼Æ¡A²Ä¤T­Ó°Ñ¼Æ¬Oºë½T«×¦h¤Ö¡A²Ä¤@­Ó°Ñ¼Æ¬O«ü¨Ì·Ó«e¨â­Ó°Ñ¼Æªº­ş¤@­Ó¬°·Ç¡A¥H½d¨Ò¤¤´N¬O¨âªÌ³£°Ñ·Ó¡A¥H or ªº¤è¦¡¨M©w
+    //TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 10, 1),  é€™è£¡æœ‰ä¸‰å€‹åƒæ•¸ï¼Œæ±ºå®šk-meansä½•æ™‚çµæŸï¼Œç¬¬äºŒå€‹åƒæ•¸æ˜¯æŒ‡è¿­ä»£æœ€å¤§æ¬¡æ•¸ï¼Œç¬¬ä¸‰å€‹åƒæ•¸æ˜¯ç²¾ç¢ºåº¦å¤šå°‘ï¼Œç¬¬ä¸€å€‹åƒæ•¸æ˜¯æŒ‡ä¾ç…§å‰å…©å€‹åƒæ•¸çš„å“ªä¸€å€‹ç‚ºæº–ï¼Œä»¥ç¯„ä¾‹ä¸­å°±æ˜¯å…©è€…éƒ½åƒç…§ï¼Œä»¥ or çš„æ–¹å¼æ±ºå®š
 	output_mat_as_csv_file_float("cluster_centers_old.csv",cluster_centers);
 	//===============LAB alignment======================//
 	rgb_mat3 = Mat::zeros(k,3,CV_32F);
@@ -354,6 +370,32 @@ int Preprocessing_Data::count_digit(float num)
 	}
 
 	return digit;
+}
+
+int Preprocessing_Data::zellers_congruence_for_week(int year, int month, int date)
+{
+	// w = ( y + [y/4] + [c/4] - 2c + [26(m+1)/10] + d - 1 ) mod 7
+	// w:æ˜ŸæœŸ, c:å¹´ä»½å‰å…©ä½æ•¸, y:å¹´ä»½å¾Œå…©ä½æ•¸, m:æœˆ(3-14), d:æ—¥, modï¼šâ€â€åŒé¤˜â€ï¼ˆ % 7 ) é€™è£¡è¦éå¸¸å°å¿ƒè² çš„çµæœï¼Œå¿…é ˆ w = ( w % 7 + 7 ) % 7
+	if(month==1)
+	{
+		month = 13;
+		year--;
+	}
+	else if(month==2)
+	{
+		month = 14;
+		year--;
+	}
+	int c = year/100;
+	int y = year%100;
+	int m = month;
+	int d = date;
+	int w = y + floor(y/4.0) + floor(c/4.0) - 2*c + floor(26*(m+1)/10.0) + d - 1;
+	w = (w % 7 + 7) % 7;
+
+	if(w==0) w = 7;
+
+	return w;
 }
 
 void Preprocessing_Data::sort_by_color(int k,Mat& rgb_mat2,Mat& cluster_centers, Mat& cluster_tag)
@@ -435,7 +477,7 @@ void Preprocessing_Data::sort_by_color(int k,Mat& rgb_mat2,Mat& cluster_centers,
 		int new_tag = cluster_vec[i].key;
 		cluster_centers_old.row(new_tag).copyTo(cluster_centers.row(i));
 		rgb_mat2_old.row(new_tag).copyTo(rgb_mat2.row(i));
-		//ª`·N:rowªº½Æ»s¤£¯à¥Îrgb_mat2.row(i) = rgb_mat2_old.row(new_tag).clone();!!!!!!!
+		//æ³¨æ„:rowçš„è¤‡è£½ä¸èƒ½ç”¨rgb_mat2.row(i) = rgb_mat2_old.row(new_tag).clone();!!!!!!!
 	}
 	for(int i=0;i<cluster_tag_old.rows;i++)
 	{
@@ -490,22 +532,22 @@ void Preprocessing_Data::interpolate_distance(Mat& first_order_distance_mat,int 
 }
 
 /**
- * ±qdata­pºâ¥­§¡»Pcovariance matrix
+ * å¾dataè¨ˆç®—å¹³å‡èˆ‡covariance matrix
  * http://en.wikipedia.org/wiki/Covariance_matrix#Definition
  *
  */
 void Preprocessing_Data::calcCovMat(Mat& data, Mat& mean, Mat& cov){
-    // ªì©l¤Æ
+    // åˆå§‹åŒ–
 	cov = Mat::zeros(data.cols, data.cols, CV_32F);
 
-	// ­pºâ¸ê®ÆÂIªº­«¤ß(¥­§¡)
+	// è¨ˆç®—è³‡æ–™é»çš„é‡å¿ƒ(å¹³å‡)
 	mean = Mat::zeros(1, data.cols, CV_32F);
 	for (int i = 0; i < data.rows; i++){
 		mean += data.row(i);
 	}
 	mean /= double(data.rows);
 
-	// ­pºâcovariance matrix
+	// è¨ˆç®—covariance matrix
 	for (int i = 0; i < data.rows; i++){
 		cov += (data.row(i) - mean).t() * (data.row(i) - mean);
 	}
@@ -515,20 +557,20 @@ void Preprocessing_Data::calcCovMat(Mat& data, Mat& mean, Mat& cov){
 
 
 /**
- * ¥ÎPrincipal Component Analysis (PCA) °µ­°ºû
+ * ç”¨Principal Component Analysis (PCA) åšé™ç¶­
  *
  */
 void Preprocessing_Data::reduceDimPCA(Mat& data, int rDim, Mat& components, Mat& result){
-	// ­pºâcovariance matrix
+	// è¨ˆç®—covariance matrix
 	Mat cov, mean;
 	calcCovMat(data, mean, cov);
 
-	// ±qcovariance matrix­pºâeigenvectors
+	// å¾covariance matrixè¨ˆç®—eigenvectors
 	// http://docs.opencv.org/modules/core/doc/operations_on_arrays.html?highlight=pca#eigen
 	Mat eigenVal, eigenVec;
 	eigen(cov, eigenVal, eigenVec);
 
-	// °O¿ı«erDim­Óprincipal components
+	// è¨˜éŒ„å‰rDimå€‹principal components
 	components = Mat(rDim, data.cols, CV_32F);
 	for (int i = 0; i < rDim; i++){
 		// http://docs.opencv.org/modules/core/doc/basic_structures.html?highlight=mat%20row#mat-row
@@ -538,11 +580,11 @@ void Preprocessing_Data::reduceDimPCA(Mat& data, int rDim, Mat& components, Mat&
 		normalize(components.row(i), components.row(i));
 	}
 
-	// ­pºâµ²ªG
+	// è¨ˆç®—çµæœ
 	result = Mat(data.rows, rDim, CV_32F);
 	for (int i = 0; i < data.rows; i++){
 		for (int j = 0; j < rDim; j++){
-			// ¤º¿n(§ë¼v¨ìprincipal component¤W)
+			// å…§ç©(æŠ•å½±åˆ°principal componentä¸Š)
 			// http://docs.opencv.org/modules/core/doc/basic_structures.html?highlight=dot#mat-dot
 			result.at<float>(i, j) = (data.row(i) - mean).dot(components.row(j));
 		}
@@ -942,7 +984,7 @@ Mat Preprocessing_Data::lab_alignment(Mat cluster_center,int luminance_threshold
 
 			align_mat = cluster_center_PCA_weight*lab_axis;
 
-			//§â­«¤ß¥­²¾¦^¥h
+			//æŠŠé‡å¿ƒå¹³ç§»å›å»
 			for(int i=0;i<align_mat.rows;i++)
 			{
 				for(int j=0;j<3;j++)
@@ -1127,7 +1169,7 @@ Mat Preprocessing_Data::lab_alignment_new(Mat cluster_center, int luminance_thre
 						add(align_mat.col(1),move_vector[v],align_mat.col(1)); //move
 						add(align_mat.col(2),move_vector[w],align_mat.col(2)); //move
 				
-						//§â­«¤ß¥­²¾¦^¥h
+						//æŠŠé‡å¿ƒå¹³ç§»å›å»
 						for(int i=0;i<align_mat.rows;i++)
 						{
 							for(int j=0;j<3;j++)
@@ -1302,7 +1344,7 @@ Mat Preprocessing_Data::lab_alignment_new_dim1(Mat cluster_center)
 						add(align_mat.col(1),move_vector[v],align_mat.col(1)); //move
 						add(align_mat.col(2),move_vector[w],align_mat.col(2)); //move
 				
-						//§â­«¤ß¥­²¾¦^¥h
+						//æŠŠé‡å¿ƒå¹³ç§»å›å»
 						for(int i=0;i<align_mat.rows;i++)
 						{
 							for(int j=0;j<3;j++)
@@ -1480,7 +1522,7 @@ Mat Preprocessing_Data::lab_alignment_new_fast(Mat cluster_center, int luminance
 						//add(align_mat.col(1),move_vector[v],align_mat.col(1)); //move
 						//add(align_mat.col(2),move_vector[w],align_mat.col(2)); //move
 				
-						//§â­«¤ß¥­²¾¦^¥h
+						//æŠŠé‡å¿ƒå¹³ç§»å›å»
 						for(int i=0;i<align_mat.rows;i++)
 						{
 							for(int j=0;j<3;j++)
@@ -1708,7 +1750,7 @@ Mat Preprocessing_Data::lab_alignment_dim1(Mat cluster_center,int luminance_thre
 			cluster_center_PCA_weight = cluster_center_PCA_temp * cluster_center_axis_invert;
 			align_mat = cluster_center_PCA_weight*lab_axis;
 
-			//§â­«¤ß¥­²¾¦^¥h
+			//æŠŠé‡å¿ƒå¹³ç§»å›å»
 			for(int i=0;i<align_mat.rows;i++)
 			{
 				for(int j=0;j<3;j++)
@@ -1868,7 +1910,7 @@ Mat Preprocessing_Data::lab_alignment_dim2(Mat cluster_center,int luminance_thre
 
 			align_mat = cluster_center_PCA_weight*lab_axis;
 
-			//§â­«¤ß¥­²¾¦^¥h
+			//æŠŠé‡å¿ƒå¹³ç§»å›å»
 			for(int i=0;i<align_mat.rows;i++)
 			{
 				for(int j=0;j<3;j++)
@@ -1983,9 +2025,9 @@ Mat Preprocessing_Data::normalize_column(Mat col_mat)
 	for(int i=0;i<col_mat.rows;i++)
 	{
 		//output_mat.at<float>(i,0) = ( col_mat.at<float>(i,0) - min ) / (max - min);
-		//OpenCVªº³o­Ónormalize(handle_mat_transpose.col(i),normalize_mat.col(i),0,1,NORM_MINMAX);
-		//©³¼hªº¹B§@¸ò³o­Ó¤@¼Ë
-		//¦ı·|³y¦¨gravity normalize®Ì°Ê¤Ó¤j(¦]¬°gravity©¼¦¹¤§¶¡ªº­È³£¤Ó±µªñ)
+		//OpenCVçš„é€™å€‹normalize(handle_mat_transpose.col(i),normalize_mat.col(i),0,1,NORM_MINMAX);
+		//åº•å±¤çš„é‹ä½œè·Ÿé€™å€‹ä¸€æ¨£
+		//ä½†æœƒé€ æˆgravity normalizeæ™ƒå‹•å¤ªå¤§(å› ç‚ºgravityå½¼æ­¤ä¹‹é–“çš„å€¼éƒ½å¤ªæ¥è¿‘)
 		output_mat.at<float>(i,0) = col_mat.at<float>(i,0) / max;
 	}
 
@@ -2005,7 +2047,7 @@ void Preprocessing_Data::output_mat_as_csv_file_float(char file_name[],Mat mat)
 		fout << endl;
 	}
 
-	fout.close();//¨SÃöÀÉ·|·í±¼
+	fout.close();//æ²’é—œæª”æœƒç•¶æ‰
 }   
 
 void Preprocessing_Data::output_mat_as_csv_file_double(char file_name[],Mat mat)
@@ -2037,7 +2079,7 @@ void Preprocessing_Data::output_mat_as_csv_file_int(char file_name[],Mat mat)
 		fout << endl;
 	}
 
-	fout.close();//¨SÃöÀÉ·|·í±¼
+	fout.close();//æ²’é—œæª”æœƒç•¶æ‰
 }   
 
 double Preprocessing_Data::TSP_boost_path_by_EdgeWeight(Mat input_mat, Mat& sort_index)
@@ -2206,7 +2248,7 @@ double Preprocessing_Data::compute_dist(Mat m1,Mat m2,int dim)
 
 void Preprocessing_Data::sort_pattern_by_color_by_TSP_coarse_to_fine(Mat lab_data, Mat& lab_color_sort_index)
 {
-	int k = lab_data.rows;//k¬O4ªº­¿¼Æ
+	int k = lab_data.rows;//kæ˜¯4çš„å€æ•¸
 	int dim = lab_data.cols;
 	int group_num = 4;
 	Mat cluster_tag = Mat::zeros(k,1,CV_32S);
@@ -2314,7 +2356,7 @@ void Preprocessing_Data::sort_pattern_by_color_by_TSP_coarse_to_fine(Mat lab_dat
 	for(int i=0;i<optimal_sort_index.rows;i++)
 	{
 		int index = optimal_sort_index.at<int>(i,0);
-		if( index!=groups[0].index2.size() ) //¥H¨¾startÂI¤£¬O¥X²{¦b³Ì«á­±
+		if( index!=groups[0].index2.size() ) //ä»¥é˜²starté»ä¸æ˜¯å‡ºç¾åœ¨æœ€å¾Œé¢
 		{
 			groups[0].sort_index.push_back( groups[0].index2[index] );
 		}
@@ -2897,7 +2939,7 @@ void Preprocessing_Data::rearrange_mat_by_sort_color_index(Mat lab_color_sort_in
 	Mat rgb_mat3_old = rgb_mat3.clone();
 	int k = cluster_center.rows;
 
-	//ª`·N:rowªº½Æ»s¤£¯à¥Îrgb_mat2.row(i) = rgb_mat2_old.row(new_tag).clone();!!!!!!!
+	//æ³¨æ„:rowçš„è¤‡è£½ä¸èƒ½ç”¨rgb_mat2.row(i) = rgb_mat2_old.row(new_tag).clone();!!!!!!!
 	for(int i=0;i<k;i++)
 	{
 		int key = lab_color_sort_index.at<int>(i,0);
@@ -2905,7 +2947,7 @@ void Preprocessing_Data::rearrange_mat_by_sort_color_index(Mat lab_color_sort_in
 		rgb_mat3_old.row(key).copyTo(rgb_mat3.row(i));
 	}
 
-	//§ó·sclusterªºtag
+	//æ›´æ–°clusterçš„tag
 	for(int i=0;i<cluster_tag_old.rows;i++)
 	{
 		int find;
@@ -2924,7 +2966,7 @@ void Preprocessing_Data::rearrange_mat_by_sort_color_index(Mat lab_color_sort_in
 
 void Preprocessing_Data::sort_histogram_by_Ev_by_TSP_coarse_to_fine(Mat cluster_center, Mat& histo_sort_index)
 {
-	int k = cluster_center.rows;//k¬O4ªº­¿¼Æ
+	int k = cluster_center.rows;//kæ˜¯4çš„å€æ•¸
 	int dim = cluster_center.cols;
 	int five_minutes = histogram.rows; 
 	int group_num = 4;
@@ -3056,7 +3098,7 @@ void Preprocessing_Data::sort_histogram_by_Ev_by_TSP_coarse_to_fine(Mat cluster_
 	for(int i=0;i<optimal_sort_index.rows;i++)
 	{
 		int index = optimal_sort_index.at<int>(i,0);
-		if( index!=groups[0].index2.size() ) //¥H¨¾startÂI¤£¬O¥X²{¦b³Ì«á­±
+		if( index!=groups[0].index2.size() ) //ä»¥é˜²starté»ä¸æ˜¯å‡ºç¾åœ¨æœ€å¾Œé¢
 		{
 			groups[0].sort_index.push_back( groups[0].index2[index] );
 		}

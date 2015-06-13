@@ -116,7 +116,8 @@ void ReadCSV::read_single_file(char* file_name)
 			//else if(j==10) //airport總運量
 			//else if(j>=4) //沒有"星期"欄位
 			//else if(j>=5) //有"星期"欄位
-			else if(j==7) //MRT總運量
+			//else if(j==7) //MRT總運量
+			else if(j==7 || j==8) //MRT總運量&高雄雨量
 			{
 				day_obj.data[dim++] = raw_data[i][j];
 				day_obj.data_dim++;

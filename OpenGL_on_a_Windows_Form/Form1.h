@@ -24,7 +24,8 @@ namespace OpenGL_on_a_Windows_Form
 			//system("matlab -nodesktop -nosplash -r draw_rect_wear2");
 
 			ReadCSV read_csv;
-			char file_name[200] = "file_list_MRT.txt";
+			char file_name[200] = "file_list_MRT_rain.txt";
+			//char file_name[200] = "file_list_MRT.txt";
 			read_csv.read_file_list(file_name);;
 
 			Preprocessing_Data preprocessing_data;
@@ -141,7 +142,7 @@ namespace OpenGL_on_a_Windows_Form
 			// 
 			this->panel1->Location = System::Drawing::Point(12, 12);
 			this->panel1->Name = L"panel1";
-			this->panel1->Size = System::Drawing::Size(1547, 291);
+			this->panel1->Size = System::Drawing::Size(1547, 363);
 			this->panel1->TabIndex = 0;
 			this->panel1->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form1::panel1_Paint);
 			this->panel1->MouseEnter += gcnew System::EventHandler(this, &Form1::panel1_MouseEnter);
@@ -149,9 +150,9 @@ namespace OpenGL_on_a_Windows_Form
 			// 
 			// panel2
 			// 
-			this->panel2->Location = System::Drawing::Point(671, 309);
+			this->panel2->Location = System::Drawing::Point(671, 381);
 			this->panel2->Name = L"panel2";
-			this->panel2->Size = System::Drawing::Size(888, 733);
+			this->panel2->Size = System::Drawing::Size(888, 661);
 			this->panel2->TabIndex = 1;
 			this->panel2->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form1::panel2_Paint);
 			this->panel2->MouseEnter += gcnew System::EventHandler(this, &Form1::panel2_MouseEnter);
@@ -159,9 +160,9 @@ namespace OpenGL_on_a_Windows_Form
 			// 
 			// panel3
 			// 
-			this->panel3->Location = System::Drawing::Point(12, 309);
+			this->panel3->Location = System::Drawing::Point(12, 381);
 			this->panel3->Name = L"panel3";
-			this->panel3->Size = System::Drawing::Size(653, 733);
+			this->panel3->Size = System::Drawing::Size(653, 661);
 			this->panel3->TabIndex = 2;
 			this->panel3->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form1::panel3_Paint);
 			this->panel3->MouseEnter += gcnew System::EventHandler(this, &Form1::panel3_MouseEnter);

@@ -48,9 +48,17 @@ namespace OpenGLForm{
 			vector<float> color;
 			color.resize(3);
 
-			int y_position = 20;
+			int y_position = 40;
 			if(!histogram_index.empty())
 			{
+				//draw date(1-31) on the front
+				int text_position_x = 60;
+				for(int i=0;i<31;i++)
+				{
+					DrawText_FTGL(i+1,text_position_x,y_position-10,16.0);
+					text_position_x += 10;
+				}
+				
 				for(int i=0;i<histogram_index.size();i++)
 				{
 					int p = 60;
@@ -58,10 +66,18 @@ namespace OpenGLForm{
 					//DrawTime_FTGL(preprocessing_data.month_vec[i].this_year,10,y_position+5);
 					//for(int j=histogram_index[i];j<histogram_index[i]+600;j++)
 					int idx = histogram_index[i];
-					DrawText_FTGL(preprocessing_data.month_vec[idx].this_year,10,y_position+7);
-					DrawText_FTGL(preprocessing_data.month_vec[idx].this_month,30,y_position+7);
+					DrawText_FTGL(preprocessing_data.month_vec[idx].this_year,10,y_position+7,20.0);
+					DrawText_FTGL(preprocessing_data.month_vec[idx].this_month,30,y_position+7,20.0);
+					
 					for(int j=0;j<preprocessing_data.raw_data_3D_array[idx].rows;j++)
 					{
+						int this_week = preprocessing_data.zellers_congruence_for_week(preprocessing_data.month_vec[idx].this_year,
+																					   preprocessing_data.month_vec[idx].this_month,
+																					   preprocessing_data.month_vec[idx].day_vec[j].date);
+						if(this_week==6 || this_week==7)
+						{
+							DrawCircle(p+5,y_position-5,3.0);//if week6 or wee7, draw circle
+						}
 						RECTANGLE *rect;
 						rect = new RECTANGLE();
 						rect->h = 15;
@@ -94,7 +110,7 @@ namespace OpenGLForm{
 						index++;
 					}
 
-					y_position += 30;
+					y_position += 40;
 				}
 			}
 
@@ -156,7 +172,7 @@ namespace OpenGLForm{
 		}		
 	}
 
-	System::Void RawDataVisualization::DrawText_FTGL(int n,int x, int y)
+	System::Void RawDataVisualization::DrawText_FTGL(int n,int x, int y, float scale)
 	{
 		glPushMatrix();
 
@@ -164,7 +180,7 @@ namespace OpenGLForm{
 		glScalef(1.0+scale_x[1],1.0+scale_y[1],1.0+scale_z[1]);	
 	
 		//float font_size = 10*(scale_factor[2]+0.4+scale_x[2]);	
-		font.FaceSize(20);
+		font.FaceSize(scale);
 		glColor3f(1.0, 1.0, 1.0);
 		glRasterPos2f(0 , 0 + font.LineHeight());
 		stringstream ss;
@@ -184,6 +200,27 @@ namespace OpenGLForm{
 
 		glPopMatrix();
 		
+	}
+
+	System::Void RawDataVisualization::DrawCircle(int x, int y, float radius)
+	{
+		int i;
+		int triangleAmount = 30; //# of triangles used to draw circle
+	
+		//GLfloat radius = 0.8f; //radius
+		GLfloat twicePi = 2.0f * 3.14;
+	
+		glBegin(GL_TRIANGLE_FAN);
+			glColor3f(1.0,0.0,0.0);
+			glVertex2f(x, y); // center of circle
+			for(i = 0; i <= triangleAmount;i++)
+			{ 
+				glVertex2f(
+					x + (radius * cos(i *  twicePi / triangleAmount)), 
+					y + (radius * sin(i * twicePi / triangleAmount))
+				);
+			}
+		glEnd();		
 	}
 
 	System::Void RawDataVisualization::DrawTime_FTGL(int index,int x, int y)
@@ -313,5 +350,9 @@ namespace OpenGLForm{
 	System::Void RawDataVisualization::clear()
 	{
 		histogram_index.clear();
+
+		raw_data_position_table.clear();
+		raw_data_position_table.resize(100);
+		for(int i=0;i<100;i++) raw_data_position_table[i].resize(31);
 	}
 }

@@ -11,7 +11,8 @@ namespace OpenGLForm{
 			virtual System::Void Render(int,int) override;
 			System::Void clear();
 	private:
-			System::Void DrawText_FTGL(float n,int x, int y);
+			System::Void DrawText_FTGL(float n,int x, int y, int, int ,int);
+			System::Void DrawText_FTGL_Zero_Padding(float n,int x, int y, int, int ,int);
 			System::Void DrawTitle_FTGL(int t,int x, int y);
 			System::Void DrawLine(int x1,int y1,int x2,int y2);
 			System::Void title_string();

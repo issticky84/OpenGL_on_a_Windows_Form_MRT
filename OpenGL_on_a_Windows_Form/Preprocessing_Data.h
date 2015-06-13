@@ -95,6 +95,7 @@ public:
 	vector<month> month_vec;
 	int day_amount;
 	Mat* raw_data_3D_array;
+	int zellers_congruence_for_week(int,int,int);
 
 };
 

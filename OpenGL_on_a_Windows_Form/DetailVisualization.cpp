@@ -41,33 +41,77 @@ namespace OpenGLForm{
 			if(!raw_data_index_2D.empty())
 			{
 					
-					int x_position = 70;
+					int x_position = 200;
+					int y_position = 150;
 					for(int i=0;i<raw_data_index_2D.size();i++)
-					{
+					{				
 						RECTANGLE *rect;
 						int index1 = raw_data_index_2D[i][0];
 						int index2 = raw_data_index_2D[i][1];
+						int this_week = preprocessing_data.zellers_congruence_for_week(preprocessing_data.month_vec[index1].this_year,
+																					   preprocessing_data.month_vec[index1].this_month,
+																					   preprocessing_data.month_vec[index1].day_vec[index2].date);
+						int r=1.0,g=1.0,b=1.0;
+						if(this_week==6 || this_week==7)
+						{
+							g = b = 0.0;
+						}
+						DrawText_FTGL(preprocessing_data.month_vec[index1].this_year, x_position-150, y_position + 10, r, g, b);
+						DrawText_FTGL_Zero_Padding(preprocessing_data.month_vec[index1].this_month, x_position-100, y_position + 10, r, g, b);
+						DrawText_FTGL_Zero_Padding(index2+1, x_position-70, y_position + 10, r, g, b);
+						float value = 0.001*abs(preprocessing_data.month_vec[index1].day_vec[index2].data[0]);
+						DrawText_FTGL(preprocessing_data.month_vec[index1].day_vec[index2].data[0], x_position + value + 10, y_position + 10, 1.0, 1.0, 1.0);
+						
 						rect = new RECTANGLE();
-						rect->h = 0.001*abs(preprocessing_data.month_vec[index1].day_vec[index2].data[0]);
-						rect->w = 50.0;
+						rect->h = 30.0;
+						rect->w = value;
 						rect->x = x_position;
-						rect->y = 550;
+						rect->y = y_position;
 						color[0] = preprocessing_data.raw_data_3D_array[index1].at<float>(index2,0);
 						color[1] = preprocessing_data.raw_data_3D_array[index1].at<float>(index2,1);
 						color[2] = preprocessing_data.raw_data_3D_array[index1].at<float>(index2,2);
 
-						rect->y -= 0.001*abs(preprocessing_data.month_vec[index1].day_vec[index2].data[0]);
-						float current_position_y = rect->y;
-						double nearest = round( preprocessing_data.month_vec[index1].day_vec[index2].data[0] );
-						DrawText_FTGL(preprocessing_data.month_vec[index1].day_vec[index2].data[0], x_position, current_position_y-20);
+						DrawRectWithOpenGL(rect,color);
+						delete(rect);
 
+						y_position+=35;
+					}					
+					
+					x_position = 750;
+					y_position = 150;
+					for(int i=0;i<raw_data_index_2D.size();i++)
+					{				
+						RECTANGLE *rect;
+						int index1 = raw_data_index_2D[i][0];
+						int index2 = raw_data_index_2D[i][1];
+						int this_week = preprocessing_data.zellers_congruence_for_week(preprocessing_data.month_vec[index1].this_year,
+																					   preprocessing_data.month_vec[index1].this_month,
+																					   preprocessing_data.month_vec[index1].day_vec[index2].date);
+						int r=1.0,g=1.0,b=1.0;
+						if(this_week==6 || this_week==7)
+						{
+							g = b = 0.0;
+						}
+						//DrawText_FTGL(preprocessing_data.month_vec[index1].this_year, x_position-150, y_position + 10, r, g, b);
+						//DrawText_FTGL(preprocessing_data.month_vec[index1].this_month, x_position-100, y_position + 10, r, g, b);
+						//DrawText_FTGL(index2+1, x_position-70, y_position + 10, r, g, b);
+						float value = abs(preprocessing_data.month_vec[index1].day_vec[index2].data[1]);
+						DrawText_FTGL(preprocessing_data.month_vec[index1].day_vec[index2].data[1], x_position + value + 10, y_position + 10, 1.0, 1.0, 1.0);
+						
+						rect = new RECTANGLE();
+						rect->h = 30.0;
+						rect->w = value;
+						rect->x = x_position;
+						rect->y = y_position;
+						color[0] = preprocessing_data.raw_data_3D_array[index1].at<float>(index2,0);
+						color[1] = preprocessing_data.raw_data_3D_array[index1].at<float>(index2,1);
+						color[2] = preprocessing_data.raw_data_3D_array[index1].at<float>(index2,2);
 
 						DrawRectWithOpenGL(rect,color);
 						delete(rect);
 
-						x_position+=55;
-					}					
-					
+						y_position+=35;
+					}	
 					/*
 					int index = raw_data_index[0];
 					float factor_g = 10.0;
@@ -236,13 +280,13 @@ namespace OpenGLForm{
 			
 		}
 		 
-		System::Void DetailVisualization::DrawText_FTGL(float n,int x, int y)
+		System::Void DetailVisualization::DrawText_FTGL(float n,int x, int y, int r, int g, int b)
 		{
 			glPushMatrix();
 
-			float font_size = 10*(scale_factor[2]+0.4+scale_x[2]);
+			float font_size = 10*(scale_factor[2]+0.6+scale_x[2]);
 			font.FaceSize(font_size);
-			glColor3f(1.0, 1.0, 1.0);
+			glColor3f(r, g, b);
 			glRasterPos2f(x , y + font.LineHeight());
 			stringstream ss;
 			ss << n;
@@ -251,7 +295,31 @@ namespace OpenGLForm{
 			font.Render(text);
 
 			glPopMatrix();
-		
+		}
+
+		System::Void DetailVisualization::DrawText_FTGL_Zero_Padding(float n,int x, int y, int r, int g, int b)
+		{
+			glPushMatrix();
+
+			float font_size = 10*(scale_factor[2]+0.6+scale_x[2]);
+			font.FaceSize(font_size);
+			glColor3f(r, g, b);
+			glRasterPos2f(x , y + font.LineHeight());
+			stringstream ss;
+			ss << n;
+			string str = ss.str();
+			char zero[] = "0";
+			if(n<10)
+			{
+				strcat(zero,str.c_str());
+				font.Render(zero);
+			}
+			else
+			{
+				text = (char*)str.c_str();
+				font.Render(text);
+			}
+			glPopMatrix();
 		}
 
 		System::Void DetailVisualization::DrawTitle_FTGL(int t,int x, int y)
@@ -289,6 +357,7 @@ namespace OpenGLForm{
 
 		System::Void DetailVisualization::clear()
 		{
-			raw_data_index.clear();
+			//raw_data_index.clear();
+			raw_data_index_2D.clear();
 		}
 }
