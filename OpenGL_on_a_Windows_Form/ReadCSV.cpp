@@ -10,6 +10,59 @@ void ReadCSV::clear()
 	attribute_index.clear();
 }
 
+void ReadCSV::read_holiday_event(char* file_name)
+{
+	FILE* file;
+	file = fopen(file_name,"r");
+	if(!file)
+	{
+		cout << "Can't open config file!" << endl;
+		perror(file_name);
+		exit(1);
+	}
+
+	char line[LENGTH];
+	char *token;
+	while(!feof(file))
+	{
+		fgets(line,LENGTH,file);
+		token = strtok(line," \/");
+		raw_data.push_back(vector<float> (1));
+		//printf("%s ",token);
+		while(token!=NULL)
+		{
+			raw_data.back().push_back(atof(token));
+			//printf("%s ",token);
+
+			token = strtok(NULL," \/");
+		}
+	}
+
+	fclose(file);
+
+	for(int i=0;i<raw_data.size();i++)
+	{
+		holiday holiday_obj;
+		for(int j=0;j<raw_data[i].size();j++)
+		{
+			if(j==1)
+				holiday_obj.year = raw_data[i][1];
+			else if(j==2)
+				holiday_obj.month = raw_data[i][2];
+			else if(j==3)
+				holiday_obj.date = raw_data[i][3];
+		}
+		holiday_vec.push_back(holiday_obj);
+	}
+	/*
+	for(int i=0;i<holiday_vec.size();i++)
+	{
+		cout << holiday_vec[i].year << " " << holiday_vec[i].month << " "  << holiday_vec[i].date << endl;
+	}
+	*/
+	raw_data.clear();
+}
+
 void ReadCSV::read_file_list(char* file_name)
 {
 	FILE* file;
@@ -105,7 +158,8 @@ void ReadCSV::read_single_file(char* file_name)
 		int dim = 0;
 		for(int j=0;j<raw_data[i].size();j++)
 		{	
-			
+			day_obj.IsHoliday = false;
+
 			if(j==1)  day_obj.year = raw_data[i][j];
 			else if(j==2)
 			{
@@ -117,6 +171,7 @@ void ReadCSV::read_single_file(char* file_name)
 			//else if(j>=4) //沒有"星期"欄位
 			//else if(j>=5) //有"星期"欄位
 			//else if(j==7) //MRT總運量
+			//else if(j==5 || j==6) //MRT紅線&橘線
 			else if(j==7 || j==8) //MRT總運量&高雄雨量
 			{
 				day_obj.data[dim++] = raw_data[i][j];

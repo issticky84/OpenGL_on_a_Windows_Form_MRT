@@ -48,12 +48,18 @@ namespace OpenGLForm{
 						RECTANGLE *rect;
 						int index1 = raw_data_index_2D[i][0];
 						int index2 = raw_data_index_2D[i][1];
+						int r=1.0,g=1.0,b=1.0;
+						if(preprocessing_data.month_vec[index1].day_vec[index2].IsHoliday)
+						{
+							r = g = 0.0;
+							b = 1.0;
+						}
 						int this_week = preprocessing_data.zellers_congruence_for_week(preprocessing_data.month_vec[index1].this_year,
 																					   preprocessing_data.month_vec[index1].this_month,
 																					   preprocessing_data.month_vec[index1].day_vec[index2].date);
-						int r=1.0,g=1.0,b=1.0;
 						if(this_week==6 || this_week==7)
 						{
+							r = 1.0;
 							g = b = 0.0;
 						}
 						DrawText_FTGL(preprocessing_data.month_vec[index1].this_year, x_position-150, y_position + 10, r, g, b);
@@ -84,14 +90,7 @@ namespace OpenGLForm{
 						RECTANGLE *rect;
 						int index1 = raw_data_index_2D[i][0];
 						int index2 = raw_data_index_2D[i][1];
-						int this_week = preprocessing_data.zellers_congruence_for_week(preprocessing_data.month_vec[index1].this_year,
-																					   preprocessing_data.month_vec[index1].this_month,
-																					   preprocessing_data.month_vec[index1].day_vec[index2].date);
-						int r=1.0,g=1.0,b=1.0;
-						if(this_week==6 || this_week==7)
-						{
-							g = b = 0.0;
-						}
+
 						//DrawText_FTGL(preprocessing_data.month_vec[index1].this_year, x_position-150, y_position + 10, r, g, b);
 						//DrawText_FTGL(preprocessing_data.month_vec[index1].this_month, x_position-100, y_position + 10, r, g, b);
 						//DrawText_FTGL(index2+1, x_position-70, y_position + 10, r, g, b);

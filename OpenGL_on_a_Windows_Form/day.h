@@ -15,6 +15,8 @@ public:
 	//int total_traffic_volume;
 	float data[100];
 	int data_dim;
+
+	bool IsHoliday;
 };
 
 #endif

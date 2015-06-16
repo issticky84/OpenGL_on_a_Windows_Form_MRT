@@ -27,12 +27,13 @@ namespace OpenGL_on_a_Windows_Form
 			char file_name[200] = "file_list_MRT_rain.txt";
 			//char file_name[200] = "file_list_MRT.txt";
 			read_csv.read_file_list(file_name);;
+			read_csv.read_holiday_event("holiday_event.txt");
 
 			Preprocessing_Data preprocessing_data;
 			preprocessing_data.Initial_selection_flag(this->Gravity_Norm->Checked,this->Linear_Acceleration_Norm->Checked,
 													  this->Gyroscope_Norm->Checked,this->First_Order_of_Distance->Checked);
 			//preprocessing_data.start(read_csv.raw_data,read_csv.attribute_index,read_csv.time_index,trackBar1->Value);
-			preprocessing_data.start2(read_csv.month_vec,trackBar1->Value);
+			preprocessing_data.start2(read_csv.month_vec,read_csv.holiday_vec, trackBar1->Value);
 
 			//waiting_flag = true;
 			//start_flag = false;
@@ -393,7 +394,7 @@ namespace OpenGL_on_a_Windows_Form
 				 preprocessing_data.Initial_selection_flag(this->Gravity_Norm->Checked,this->Linear_Acceleration_Norm->Checked,
 															this->Gyroscope_Norm->Checked,this->First_Order_of_Distance->Checked);
 				 
-				 preprocessing_data.start2(read_csv.month_vec,trackBar1->Value);
+				 preprocessing_data.start2(read_csv.month_vec,read_csv.holiday_vec,trackBar1->Value);
 				 //preprocessing_data.start(read_csv.raw_data,read_csv.attribute_index,read_csv.time_index,trackBar1->Value);
 				 //System::Windows::Forms::MessageBox::Show(trackBar1->Value.ToString());
 				 //progressBar1->Style = ProgressBarStyle::Marquee;

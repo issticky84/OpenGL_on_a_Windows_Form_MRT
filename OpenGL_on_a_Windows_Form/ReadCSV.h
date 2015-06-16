@@ -5,6 +5,7 @@
 #include "mtxlib.h"
 
 #include "month.h"
+#include "holiday.h"
 
 #define LENGTH 1000
 
@@ -22,9 +23,10 @@ public:
 	int time_index;
 
 	vector<month> month_vec;
-
+	vector<holiday> holiday_vec;
 
 	void read_file_list(char*);
+	void read_holiday_event(char*);
 	//vector < vector<float> > position_data;
 	//vector < vector<float> > histogram_data;
 	//vector < vector<float> > color_data;
@@ -64,5 +66,7 @@ private:
 	//
 	//map<int,int> hour_map;
 	void read_single_file(char*);
+	
+	
 	
 };

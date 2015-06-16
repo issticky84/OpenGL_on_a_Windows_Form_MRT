@@ -27,6 +27,7 @@
 //////
 #include "tsp_brute.h"
 
+
 using namespace tapkee;
 using namespace Eigen;
 using namespace boost;
@@ -46,7 +47,7 @@ void Preprocessing_Data::Initial_selection_flag(bool f1,bool f2,bool f3,bool f4)
 	select_distance = f4;	
 }
 
-void Preprocessing_Data::start2(vector<month> month_vec_read, int k)
+void Preprocessing_Data::start2(vector<month> month_vec_read, vector<holiday> holiday_vec, int k)
 {
 	month_vec = month_vec_read;
 
@@ -61,6 +62,10 @@ void Preprocessing_Data::start2(vector<month> month_vec_read, int k)
 		for(int j=0;j<month_vec[i].day_vec.size();j++)
 		{
 			day_amount++;
+			if( check_holiday(holiday_vec,month_vec[i].this_year,month_vec[i].this_month,month_vec[i].day_vec[j].date) )
+			{
+				month_vec[i].day_vec[j].IsHoliday = true;
+			}
 			for(int u=0;u<dim;u++)
 			{
 				float data = month_vec[i].day_vec[j].data[u];
@@ -107,7 +112,7 @@ void Preprocessing_Data::start2(vector<month> month_vec_read, int k)
 	{
 		normalize(model.col(i),model.col(i),0,10,NORM_MINMAX);
 	}
-	model.col(0) = model.col(0).mul(2);
+	model.col(0) = model.col(0).mul(2.0);
 
 	output_mat_as_csv_file_float("model.csv",model);
 	//============Setting matrix for K-means============//
@@ -396,6 +401,20 @@ int Preprocessing_Data::zellers_congruence_for_week(int year, int month, int dat
 	if(w==0) w = 7;
 
 	return w;
+}
+
+bool Preprocessing_Data::check_holiday(vector<holiday> holiday_vec,int year, int month, int date)
+{
+	bool ans = false;
+	for(int i=0;i<holiday_vec.size();i++)
+	{
+		if(holiday_vec[i].year == year && holiday_vec[i].month == month && holiday_vec[i].date == date)
+		{
+			return true;
+		}
+	}
+	
+	return ans;
 }
 
 void Preprocessing_Data::sort_by_color(int k,Mat& rgb_mat2,Mat& cluster_centers, Mat& cluster_tag)

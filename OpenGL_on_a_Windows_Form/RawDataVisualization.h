@@ -18,7 +18,7 @@ namespace OpenGLForm{
 			System::Void FindHistogram(int x,int y);
 			System::Void DrawTime_FTGL(int index,int x, int y);
 			System::Void DrawText_FTGL(int,int,int,float);
-			System::Void DrawCircle(int,int,float);
+			System::Void DrawCircle(int,int,float,float,float,float);
 			System::Void time_string();
 	};
 }

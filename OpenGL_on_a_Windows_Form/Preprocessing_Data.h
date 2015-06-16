@@ -10,7 +10,9 @@
 #include <vector>
 #include "cv.h"
 #include "mtxlib.h"//vector2
+
 #include "month.h"
+#include "holiday.h"
 
 #define LENGTH 1000
 
@@ -72,7 +74,7 @@ private:
 public:
 	Preprocessing_Data();
 	void start(vector < vector<float> >,vector<int>,int,int);
-	void start2(vector<month>  , int);
+	void start2(vector<month>,vector<holiday>,int);
 	void Initial_selection_flag(bool,bool,bool,bool);
 
 	int num_of_five_minutes;
@@ -96,7 +98,7 @@ public:
 	int day_amount;
 	Mat* raw_data_3D_array;
 	int zellers_congruence_for_week(int,int,int);
-
+	bool check_holiday(vector<holiday>,int,int,int);
 };
 
 

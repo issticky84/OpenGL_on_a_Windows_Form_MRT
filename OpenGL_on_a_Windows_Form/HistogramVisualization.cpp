@@ -148,6 +148,7 @@ namespace OpenGLForm{
 				int t=0;
 				for(int i=0;i<preprocessing_data.histogram.rows;++i)
 				{
+					float end_position;
 					current_hour = preprocessing_data.month_vec[i].this_year;
 					if(current_hour!=last_hour)
 					{
@@ -186,7 +187,6 @@ namespace OpenGLForm{
 									}
 								}
 
-								float end_position;
 								for(int u=start;u<start+pixels;++u)
 								{
 									RECTANGLE *rect;
@@ -198,26 +198,25 @@ namespace OpenGLForm{
 									DrawRectWithOpenGL(rect,draw_color);	
 									end_position = rect->x;
 									delete(rect);
-
 								}
-								//table record
-								histogram_position_table[i].x = 110 + preprocessing_data.position.at<double>(i,0)/10.0;
-								histogram_position_table[i].y = y_coord;
-								histogram_position_table[i].z = 110 + preprocessing_data.position.at<double>(i,0)/10.0 + end_position;
-								histogram_position_table[i].w = y_coord + 6.0;
-								
-								histogram_position_table[i].x *= (scale_factor[0] + scale_x[0]);
-								histogram_position_table[i].y *= (scale_factor[0] + scale_y[0]);
-								histogram_position_table[i].z *= (scale_factor[0] + scale_x[0]);
-								histogram_position_table[i].w *= (scale_factor[0] + scale_y[0]);
-								histogram_position_table[i].x += move_x[0];
-								histogram_position_table[i].y += move_y[0];
-								histogram_position_table[i].z += move_x[0];
-								histogram_position_table[i].w += move_y[0];
-
 								start += pixels;
 							}		
 						}
+
+						//table record
+						histogram_position_table[i].x = 110 + preprocessing_data.position.at<double>(i,0)/10.0;
+						histogram_position_table[i].y = y_coord;
+						histogram_position_table[i].z = end_position;
+						histogram_position_table[i].w = y_coord + 6.0;
+								
+						histogram_position_table[i].x *= (scale_factor[0] + scale_x[0]);
+						histogram_position_table[i].y *= (scale_factor[0] + scale_y[0]);
+						histogram_position_table[i].z *= (scale_factor[0] + scale_x[0]);
+						histogram_position_table[i].w *= (scale_factor[0] + scale_y[0]);
+						histogram_position_table[i].x += move_x[0];
+						histogram_position_table[i].y += move_y[0];
+						histogram_position_table[i].z += move_x[0];
+						histogram_position_table[i].w += move_y[0];
 
 						y_coord-=6;
 						last_hour = current_hour;
